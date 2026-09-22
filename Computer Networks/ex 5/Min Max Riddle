@@ -1,0 +1,68 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#define MAX(a, b) ((a) > (b) ? (a) : (b))
+
+int* riddle(int arr_count, int* arr, int* result_count) {
+    *result_count = arr_count;
+    int* ans = (int*)calloc(arr_count + 1, sizeof(int));
+    int* left = (int*)malloc(arr_count * sizeof(int));
+    int* right = (int*)malloc(arr_count * sizeof(int));
+    int* stack = (int*)malloc(arr_count * sizeof(int));
+    int top = -1;
+    for (int i = 0; i < arr_count; i++) {
+        while (top >= 0 && arr[stack[top]] >= arr[i]) {
+            top--;
+        }
+        left[i] = (top == -1) ? -1 : stack[top];
+        stack[++top] = i;
+    }
+
+    top = -1; 
+    for (int i = arr_count - 1; i >= 0; i--) {
+        while (top >= 0 && arr[stack[top]] >= arr[i]) {
+            top--;
+        }
+        right[i] = (top == -1) ? arr_count : stack[top];
+        stack[++top] = i;
+    }
+    for (int i = 0; i < arr_count; i++) {
+        int window_size = right[i] - left[i] - 1;
+        ans[window_size] = MAX(ans[window_size], arr[i]);
+    }
+    for (int i = arr_count - 1; i >= 1; i--) {
+        ans[i] = MAX(ans[i], ans[i + 1]);
+    }
+    int* final_ans = (int*)malloc(arr_count * sizeof(int));
+    for (int i = 0; i < arr_count; i++) {
+        final_ans[i] = ans[i + 1];
+    }
+    free(ans);
+    free(left);
+    free(right);
+    free(stack);
+
+    return final_ans;
+}
+
+int main() {
+    int n;
+    if (scanf("%d", &n) != 1) return 0;
+
+    int* arr = (int*)malloc(n * sizeof(int));
+    for (int i = 0; i < n; i++) {
+        if (scanf("%d", &arr[i]) != 1) return 0;
+    }
+
+    int result_count;
+    int* res = riddle(n, arr, &result_count);
+
+    for (int i = 0; i < result_count; i++) {
+        printf("%d%s", res[i], (i == result_count - 1) ? "" : " ");
+    }
+    printf("\n");
+
+    free(arr);
+    free(res);
+    return 0;
+}
